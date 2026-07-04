@@ -2,27 +2,26 @@ pipeline {
     agent any
 
     stages {
+
         stage('Clone') {
             steps {
                 git branch: 'main', url: 'https://github.com/mkumar5989/jenkins-demo.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building application...'
+                sh 'docker build -t jenkins-demo-app .'
             }
         }
 
-        stage('Test') {
+        stage('Run Container') {
             steps {
-                echo 'Running tests...'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying application...'
+                sh '''
+                docker stop jenkins-app || true
+                docker rm jenkins-app || true
+                docker run -d -p 8081:80 --name jenkins-app jenkins-demo-app
+                '''
             }
         }
     }
